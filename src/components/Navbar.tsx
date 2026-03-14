@@ -45,6 +45,10 @@ export function Navbar({ currentPage, navigate }: NavbarProps) {
             id: "admin-menu",
             label: "Kelola Menu",
           },
+          {
+            id: "admin-setting",
+            label: "Pengaturan",
+          },
         ]
       : [
           {
@@ -116,7 +120,7 @@ export function Navbar({ currentPage, navigate }: NavbarProps) {
               <button
                 key={link.id}
                 onClick={() => handleNavigate(link.id)}
-                className={`text-sm font-medium transition-colors duration-200 ${currentPage === link.id ? "text-primary-dark border-b-2 border-primary pb-1" : "text-gray-600 hover:text-primary"}`}
+                className={`text-sm sm:text-xs font-medium transition-colors duration-200 ${currentPage === link.id ? "text-primary-dark border-b-2 border-primary pb-1" : "text-gray-600 hover:text-primary"}`}
               >
                 {link.label}
               </button>

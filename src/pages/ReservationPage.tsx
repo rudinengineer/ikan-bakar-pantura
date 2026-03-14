@@ -18,7 +18,8 @@ import { formatRupiah, formatDate } from "../utils/format";
 import swal from "sweetalert2";
 import { useAxios } from "../utils/axios";
 import Spinner from "../components/Spinner";
-import { baseurl } from "../constants/app";
+import { apiurl, assetUrl, baseurl } from "../constants/app";
+import axios from "axios";
 
 interface ReservationPageProps {
   navigate: (page: string) => void;
@@ -46,6 +47,7 @@ export function ReservationPage({ navigate }: ReservationPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successId, setSuccessId] = useState<string | null>(null);
   const [loadingCheckout, setLoadingCheckout] = React.useState<boolean>(false);
+  const [setting, setSetting] = React.useState<any>();
 
   // Modal States
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -184,7 +186,7 @@ ${orderItemsMessage}
 *Total* : Rp. ${new Intl.NumberFormat("id-ID", { currency: "IDR" }).format(cartTotal)}
 
 Cek detail pesanan di sini:
-${baseurl}#reservation-detail/${data?.data?.order_id}
+${baseurl}#order-detail/${data?.data?.order_id}
 
 ~ Terimakasih. Ditunggu ya kak konfirmasinya…`;
 
@@ -213,7 +215,7 @@ ${baseurl}#reservation-detail/${data?.data?.order_id}
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText("8241119432");
+      await navigator.clipboard.writeText(setting?.account_number);
       swal.fire({
         icon: "success",
         title: "Success",
@@ -223,6 +225,22 @@ ${baseurl}#reservation-detail/${data?.data?.order_id}
       console.error("Failed to copy: ", err);
     }
   };
+
+  React.useEffect(() => {
+    useAxios
+      .get("/setting", {
+        headers: {
+          Authorization: `Bearer ${currentUser?.access_token ?? ""}`,
+        },
+      })
+      .then(async (response) => {
+        const data = await response.data;
+
+        if (data?.status) {
+          setSetting(data?.data);
+        }
+      });
+  }, []);
 
   return (
     <div className="min-h-screen bg-warm-50 py-8">
@@ -554,9 +572,11 @@ ${baseurl}#reservation-detail/${data?.data?.order_id}
                 <div className="space-y-4">
                   <div className="sm:flex justify-between items-center bg-white p-4 rounded-xl border border-blue-100">
                     <div>
-                      <p className="font-bold text-dark">BCA</p>
+                      <p className="font-bold text-dark">{setting?.bank}</p>
                       <div className="flex gap-2 items-center">
-                        <p className="text-gray-600 font-mono">8241119432</p>
+                        <p className="text-gray-600 font-mono">
+                          {setting?.account_number}
+                        </p>
                         <button
                           onClick={() => copyToClipboard()}
                           className="flex text-xs items-center gap-1 bg-primary px-3 py-1 rounded-md text-white"
@@ -566,7 +586,7 @@ ${baseurl}#reservation-detail/${data?.data?.order_id}
                         </button>
                       </div>
                       <p className="text-sm text-gray-500">
-                        Fanny Maftuhah Sutrisno
+                        {setting?.account_name}
                       </p>
                     </div>
                     <div className="mt-2 sm:mt-0 sm:text-right">
@@ -581,27 +601,31 @@ ${baseurl}#reservation-detail/${data?.data?.order_id}
                 </div>
 
                 {/* QRIS */}
-                <div className="mt-3 space-y-4">
-                  <div className="flex justify-center items-center bg-white p-4 rounded-xl border border-blue-100">
-                    <div>
-                      <div className="size-52 sm:size-60 bg-gray-400 flex justify-center items-center rounded-md">
+                {setting?.qris && (
+                  <div className="mt-3 space-y-4">
+                    <div className="flex justify-center items-center bg-white p-4 rounded-xl border border-blue-100">
+                      <div>
+                        {/* <div className="size-52 sm:size-60 bg-gray-400 flex justify-center items-center rounded-md">
                         <h1 className="text-white font-family-inter font-bold text-center">
                           QRIS Coming Soon
                         </h1>
+                      </div> */}
+
+                        <img
+                          src={assetUrl + "assets/images/" + setting?.qris}
+                          alt="QRIS"
+                          className="w-full h-full sm:h-60"
+                        />
+
+                        <a href={apiurl + "download-qris"} target="_blank">
+                          <button className="mt-3 group relative w-full flex justify-center py-3.5 sm:px-4 border border-transparent text-sm font-bold rounded-xl text-dark bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all shadow-md">
+                            Download
+                          </button>
+                        </a>
                       </div>
-
-                      {/* <img
-                        src="https://d2v6npc8wmnkqk.cloudfront.net/storage/26035/conversions/Tipe-QRIS-statis-small-large.jpg"
-                        alt=""
-                        className="w-full h-full sm:h-60"
-                      /> */}
-
-                      <button className="mt-3 group relative w-full flex justify-center py-3.5 sm:px-4 border border-transparent text-sm font-bold rounded-xl text-dark bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all shadow-md">
-                        Download
-                      </button>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
 
               <div className="mb-8">

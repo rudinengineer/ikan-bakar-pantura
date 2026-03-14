@@ -14,6 +14,7 @@ import AdminMenu from "./pages/admin/AdminMenu";
 import AdminPacketMenu from "./pages/admin/AdminPacketMenu";
 import { PacketProducts } from "./pages/PacketProducts";
 import { OrderDetailPage } from "./pages/OrderDetailPage";
+import AdminSetting from "./pages/admin/AdminSetting";
 
 function AppContent() {
   const { currentUser } = useAppContext();
@@ -73,6 +74,8 @@ function AppContent() {
         return <AdminPacket navigate={navigate} />;
       case "admin-menu":
         return <AdminMenu navigate={navigate} />;
+      case "admin-setting":
+        return <AdminSetting navigate={navigate} />;
       default:
         if (currentPage.includes("packet-menu")) {
           return (
@@ -85,7 +88,9 @@ function AppContent() {
         }
 
         if (currentPage.includes("order-detail")) {
-          return <OrderDetailPage navigate={navigate} />;
+          return (
+            <OrderDetailPage navigate={navigate} currentPage={currentPage} />
+          );
         }
 
         return <MenuPage navigate={navigate} />;
