@@ -1,0 +1,561 @@
+import React, { FormEvent, useEffect, useState } from "react";
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+} from "@tanstack/react-table";
+import { useAxios } from "../../utils/axios";
+import {
+  EditIcon,
+  PlusIcon,
+  SaveIcon,
+  ShoppingBagIcon,
+  TrashIcon,
+  XIcon,
+} from "lucide-react";
+import swal from "sweetalert2";
+import Spinner from "../../components/Spinner";
+import { useAppContext } from "../../context/AppContext";
+import { categoryType } from "../../types/category";
+import { packetType } from "../../types/packet";
+import { assetUrl } from "../../constants/app";
+
+interface AuthPageProps {
+  navigate: (page: string) => void;
+}
+
+export default function AdminPacket({ navigate }: AuthPageProps) {
+  const { currentUser, logout } = useAppContext();
+  const [data, setData] = useState([]);
+  const [search, setSearch] = useState("");
+  const [inputSearch, setInputSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [totalData, setTotalData] = useState(0);
+  const [modalShow, setModalShow] = React.useState<boolean>(false);
+
+  const [formId, setFormId] = React.useState();
+  const [editData, setEditData] = React.useState<packetType>();
+  const [error, setError] = React.useState();
+  const [formLoading, setFormLoading] = React.useState<boolean>(false);
+  const [deleteLoading, setDeleteLoading] = React.useState<boolean>(false);
+
+  const [categories, setCategories] = React.useState<categoryType[]>([]);
+
+  React.useEffect(() => {
+    useAxios.get("/categories").then(async (response) => {
+      const data = await response.data;
+
+      if (data?.status) {
+        setCategories(data?.data);
+      }
+    });
+  }, []);
+
+  const columns = [
+    {
+      accessorKey: "id",
+      header: "No",
+      cell: ({ row }) =>
+        row.index + 1 + pagination.pageIndex * pagination.pageSize,
+    },
+    {
+      accessorKey: "image",
+      header: "Gambar",
+      cell: ({ row }) => {
+        return (
+          <img
+            src={assetUrl + "assets/images/" + row?.original?.image}
+            width={80}
+            alt={row?.original?.name}
+          />
+        );
+      },
+    },
+    { accessorKey: "category.name", header: "Kategori" },
+    { accessorKey: "name", header: "Nama" },
+    { accessorKey: "order_number", header: "Urutan Ke" },
+    {
+      accessorKey: "id",
+      header: "Action",
+      cell: ({ row }) => {
+        return (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate("packet-menu/" + row?.original?.id)}
+              className="group relative flex items-center justify-center gap-1.5 rounded-md border border-transparent bg-green-500 p-2 text-xs font-bold text-white shadow-md transition-all hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+            >
+              <ShoppingBagIcon className="size-4" />
+              <span>Kelola Menu</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setModalShow(true);
+                setFormId(row?.original?.id);
+                setEditData(row?.original);
+              }}
+              className="group relative flex items-center justify-center gap-1.5 rounded-md border border-transparent bg-primary p-2 text-xs font-bold text-white shadow-md transition-all hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            >
+              <EditIcon className="size-4" />
+            </button>
+
+            <button
+              disabled={deleteLoading}
+              onClick={() => handleDelete(row?.original?.id)}
+              className="group relative flex items-center justify-center gap-1.5 rounded-md border border-transparent bg-red-500 p-2 text-xs font-bold text-white shadow-md transition-all hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            >
+              {deleteLoading ? <Spinner /> : <TrashIcon className="size-4" />}
+            </button>
+          </div>
+        );
+      },
+    },
+  ];
+
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 5,
+  });
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      setSearch(inputSearch);
+      setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    }, 500);
+
+    return () => clearTimeout(delay);
+  }, [inputSearch]);
+
+  const fetchDatatables = () => {
+    useAxios
+      .get("/packet/datatables", {
+        params: {
+          page: pagination.pageIndex + 1,
+          limit: pagination.pageSize,
+          search,
+        },
+        headers: {
+          Authorization: `Bearer ${currentUser?.access_token ?? ""}`,
+        },
+      })
+      .catch((e) => {
+        if (e.response.status === 401) {
+          logout();
+          navigate("auth");
+          return;
+        }
+      })
+      .then(async (response) => {
+        const data = await response.data;
+
+        if (data?.status) {
+          setData(data?.data?.packets);
+          setTotalData(data?.data?.data_total);
+        } else {
+          setData([]);
+          setTotalData(0);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchDatatables();
+  }, [pagination.pageIndex, pagination.pageSize, search]);
+
+  const table = useReactTable({
+    data,
+    columns,
+    state: {
+      pagination,
+    },
+    onPaginationChange: setPagination,
+    getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+    pageCount: Math.ceil(totalData / pagination.pageSize),
+  });
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+
+    setFormLoading(true);
+
+    let url = "/packet";
+    if (editData?.id) {
+      url = "/packet/" + formId;
+    }
+
+    useAxios
+      .post(url, formData, {
+        headers: {
+          Authorization: `Bearer ${currentUser?.access_token ?? ""}`,
+        },
+      })
+      .then(async (response) => {
+        const data = await response.data;
+
+        if (data?.status) {
+          setModalShow(false);
+          setError(undefined);
+          setEditData(undefined);
+          fetchDatatables();
+        }
+      })
+      .catch((e) => {
+        if (e.response.status === 401) {
+          logout();
+          navigate("auth");
+          return;
+        }
+
+        if (e.response.status === 400) {
+          const key = Object.keys(e.response?.data?.data)[0];
+          setError(e.response?.data?.data[key]);
+          return;
+        }
+
+        swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Data gagal disimpan!",
+          timer: 2500,
+        });
+      })
+      .finally(() => {
+        setFormLoading(false);
+      });
+  };
+
+  const handleDelete = (id: number) => {
+    swal
+      .fire({
+        icon: "question",
+        title: "Anda Yakin?",
+        text: "Data akan terhapus!",
+        showCancelButton: true,
+      })
+      .then((e) => {
+        if (e.isConfirmed) {
+          setDeleteLoading(true);
+
+          useAxios
+            .delete("/packet/" + id, {
+              headers: {
+                Authorization: `Bearer ${currentUser?.access_token ?? ""}`,
+              },
+            })
+            .then(async (response) => {
+              const data = await response.data;
+
+              if (data?.status) {
+                fetchDatatables();
+              }
+            })
+            .catch((e) => {
+              if (e.response.status === 401) {
+                logout();
+                navigate("auth");
+                return;
+              }
+
+              swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Data gagal dihapus!",
+                timer: 2500,
+              });
+            });
+        }
+      })
+      .finally(() => {
+        setDeleteLoading(false);
+      });
+  };
+
+  return (
+    <>
+      {/* Form Modal */}
+      {modalShow && (
+        <div className="w-full h-screen flex justify-center items-center fixed top-0 left-0 z-[90] p-4">
+          <div
+            onClick={() => {
+              setModalShow(false);
+              setError(undefined);
+              setEditData(undefined);
+            }}
+            className="absolute top-0 left-0 w-full h-full bg-black/25 inset-0"
+          ></div>
+
+          <div className="w-[500px] bg-white p-4 px-6 rounded-xl relative">
+            <div className="w-full flex justify-between items-center">
+              <h1 className="text-xl font-bold">
+                {editData?.id ? "Ubah Data" : "Tambah Data"}
+              </h1>
+              <button
+                type="button"
+                onClick={() => {
+                  setModalShow(false);
+                  setError(undefined);
+                  setEditData(undefined);
+                }}
+              >
+                <XIcon className="size-5" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={handleSubmit}
+              action=""
+              method="post"
+              className="mt-6"
+            >
+              {error && (
+                <div className="mb-3 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
+                  {error}
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Kategori
+                </label>
+                <div className="relative">
+                  <select
+                    onChange={(e: any) =>
+                      setEditData((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              category_id: e.target.value,
+                            }
+                          : prev,
+                      )
+                    }
+                    name="category_id"
+                    className="outline-none block w-full px-3 py-3 border text-dark border-gray-300 rounded-xl focus:ring-primary focus:border-primary sm:text-sm transition-colors"
+                  >
+                    <option disabled selected>
+                      Pilih Kategori
+                    </option>
+                    {categories.map((value) => (
+                      <option
+                        value={value.id}
+                        selected={value.id === editData?.category.id}
+                      >
+                        {value.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="mt-3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nama Paket
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="name"
+                    className="outline-none block w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-primary focus:border-primary sm:text-sm transition-colors"
+                    placeholder="Masukkan nama paket"
+                    value={editData?.name}
+                    onChange={(e: any) =>
+                      setEditData((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              name: e.target.value,
+                            }
+                          : prev,
+                      )
+                    }
+                    autoComplete="off"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Gambar
+                </label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    name="image"
+                    className="outline-none block w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-primary focus:border-primary sm:text-sm transition-colors"
+                    accept="image/*"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Urutan Ke
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    name="order_number"
+                    className="outline-none block w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-primary focus:border-primary sm:text-sm transition-colors"
+                    placeholder="Masukkan nomor urutan"
+                    value={editData?.order_number}
+                    onChange={(e: any) =>
+                      setEditData((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              order_number: e.target.value,
+                            }
+                          : prev,
+                      )
+                    }
+                    autoComplete="off"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 w-full flex justify-end">
+                <button
+                  disabled={formLoading}
+                  className="group relative flex items-center justify-center gap-1.5 rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                >
+                  {formLoading && <Spinner />}
+
+                  {!formLoading && (
+                    <>
+                      <SaveIcon className="size-5" />
+                      <span>Simpan Data</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-4 px-4 py-14">
+        <div className="py-10">
+          <h1 className="text-3xl font-family-inter font-bold text-dark">
+            Kelola Paket Menu
+          </h1>
+
+          <div className="mt-3">
+            <button
+              type="button"
+              onClick={() => setModalShow(true)}
+              className="group relative flex items-center justify-center gap-1.5 rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-bold text-white shadow-md transition-all hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            >
+              <PlusIcon className="size-4" />
+              <span>Tambah Data</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="flex w-full justify-end">
+          <input
+            type="text"
+            placeholder="Search"
+            value={inputSearch}
+            onChange={(e) => setInputSearch(e.target.value)}
+            className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-blue-500"
+          />
+        </div>
+
+        <div className="w-full overflow-x-auto rounded-md border border-gray-200 shadow-sm">
+          <table className="min-w-full bg-white text-sm">
+            <thead className="bg-primary">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className="px-4 py-3 text-left font-semibold text-white"
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    className="px-4 py-6 text-center text-gray-500"
+                  >
+                    Loading...
+                  </td>
+                </tr>
+              ) : table.getRowModel().rows.length > 0 ? (
+                table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="border-t odd:bg-gray-50 even:bg-white hover:bg-gray-100"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-4 py-3 text-gray-600">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    className="px-4 py-6 text-center text-gray-500"
+                  >
+                    Data tidak ditemukan
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-600">
+            Halaman{" "}
+            <span className="font-medium">
+              {table.getState().pagination.pageIndex + 1}
+            </span>{" "}
+            dari{" "}
+            <span className="font-medium">{table.getPageCount() || 1}</span>
+          </p>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage() || loading}
+              className="rounded-md border border-gray-300 px-3 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Sebelumnya
+            </button>
+
+            <button
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage() || loading}
+              className="rounded-md bg-primary px-3 py-1.5 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Berikutnya
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
