@@ -18,6 +18,7 @@ import { assetUrl } from "../constants/app";
 import { menuType } from "../types/menu";
 import Spinner from "../components/Spinner";
 import logo from "../assets/logo.png";
+import background from "../assets/cabang-bogorejo.jpeg";
 
 interface MenuPageProps {
   navigate: (page: string) => void;
@@ -205,12 +206,12 @@ export function MenuPage({ navigate }: MenuPageProps) {
   return (
     <div className="min-h-screen pb-24">
       {/* Header Section */}
-      <div className="bg-dark text-white py-12 px-4 relative overflow-hidden">
+      <div className="bg-dark text-white pt-20 py-12 px-4 relative overflow-hidden">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           <img
-            src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80"
-            alt="Grilled Seafood"
+            src={background}
+            alt="Background"
             className="w-full h-full object-cover"
           />
 
@@ -222,7 +223,7 @@ export function MenuPage({ navigate }: MenuPageProps) {
             Katalog Menu
           </h1> */}
           <div className="w-full flex justify-center">
-            <img src={logo} alt="Ikan Bakar Pantura" width={250} />
+            <img src={logo} alt="Ikan Bakar Pantura" width={280} />
           </div>
           <span className="mt-4 inline-block py-3 px-6 rounded-full bg-primary/20 text-primary border border-primary/30 text-[10px] sm:text-sm font-semibold tracking-wider uppercase mb-6 backdrop-blur-sm">
             Spesialis Seafood Tuban
@@ -271,7 +272,7 @@ export function MenuPage({ navigate }: MenuPageProps) {
         ) : (
           <>
             {/* Tabs */}
-            <div className="mt-8 mb-6 flex justify-center space-x-2">
+            <div className="mt-6 mb-6 flex justify-center space-x-2">
               {/* Category Skeleton */}
               {categoryLoading &&
                 [1, 2].map((_, index) => (
@@ -293,6 +294,12 @@ export function MenuPage({ navigate }: MenuPageProps) {
                 ))}
             </div>
 
+            <div className="mt-6 mb-4 w-full flex justify-center">
+              <h1 className="font-family-inter font-semibold text-center text-primary">
+                Click gambar untuk memesan
+              </h1>
+            </div>
+
             {/* Packet Skeleton */}
             <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
               {packetLoading &&
@@ -312,7 +319,7 @@ export function MenuPage({ navigate }: MenuPageProps) {
             )}
 
             {/* Packet Cards */}
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-6">
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-4">
               {!packetLoading &&
                 packets.map((value, index) => (
                   <a
@@ -321,7 +328,7 @@ export function MenuPage({ navigate }: MenuPageProps) {
                       setLoadingPacketMenus(true);
                     }}
                     key={index}
-                    className="cursor-pointer"
+                    className="cursor-pointer p-4 rounded-xl transition ease-in-out hover:shadow-2xl hover:-translate-y-1"
                   >
                     {activeCategory === categories[0].slug && (
                       <h1 className="text-center font-light mb-2 font-family-inter">

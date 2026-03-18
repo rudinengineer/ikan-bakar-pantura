@@ -48,7 +48,7 @@ export function CartPage({ navigate }: CartPageProps) {
     // }
   };
   return (
-    <div className="min-h-screen bg-warm-50 py-8">
+    <div className="min-h-screen bg-warm-50 py-12">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <button
           onClick={() => navigate("menu")}
@@ -64,25 +64,27 @@ export function CartPage({ navigate }: CartPageProps) {
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Cart Items */}
-          <div className="lg:w-2/3 space-y-4">
+          <div className="lg:w-2/3 space-y-2">
             {cart.map((item) => (
               <div
                 key={item.menuItem.id}
                 className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center gap-4"
               >
                 <div className="flex-grow">
-                  <span className="text-xs font-bold text-primary-dark bg-primary/10 px-2 py-1 rounded mb-2 inline-block">
-                    {item.menuItem.category}
-                  </span>
+                  {false && (
+                    <span className="hidden sm:inline-block text-xs font-bold text-primary-dark bg-primary/10 px-2 py-1 rounded mb-2">
+                      {item.menuItem.category}
+                    </span>
+                  )}
                   <h3 className="text-lg font-family-inter font-bold text-dark">
                     {item.menuItem.name}
                   </h3>
-                  <p className="text-gray-500 font-medium mt-1">
+                  <p className="hidden sm:block text-gray-500 font-medium mt-1">
                     {formatRupiah(item.menuItem.price)}
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between w-full sm:w-auto gap-6 mt-4 sm:mt-0">
+                <div className="flex items-center justify-between w-full sm:w-auto gap-6 mt-0 sm:mt-0">
                   <div className="flex items-center bg-warm-50 rounded-lg border border-warm-200">
                     <button
                       onClick={() =>

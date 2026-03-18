@@ -41,13 +41,25 @@ export function ReservationPage({ navigate }: ReservationPageProps) {
   const [people, setPeople] = useState("2");
   const [customerNotes, setCustomerNotes] = useState("");
   const [place, setPlace] = React.useState<string>("");
-  const [paymentMethod, setPaymentMethod] = useState<"full" | "dp">("full");
+  const [paymentMethod, setPaymentMethod] = useState<"full" | "dp" | "custom">(
+    "full",
+  );
   const [paymentProof, setPaymentProof] = useState<any>(null);
   const [fileName, setFileName] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successId, setSuccessId] = useState<string | null>(null);
   const [loadingCheckout, setLoadingCheckout] = React.useState<boolean>(false);
   const [setting, setSetting] = React.useState<any>();
+  const [nominalDp, setNominalDp] = React.useState<number>(0);
+
+  const dpAmount = cartTotal * 0.5;
+  const [amountToPay, setAmountToPay] = React.useState<number>(
+    paymentMethod === "full"
+      ? cartTotal
+      : paymentMethod === "dp"
+        ? dpAmount
+        : nominalDp,
+  );
 
   // Modal States
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -65,8 +77,6 @@ export function ReservationPage({ navigate }: ReservationPageProps) {
   //   // }
   // }, [currentUser, cart, navigate, successId]);
   // if (!currentUser) return null;
-  const dpAmount = cartTotal * 0.5;
-  const amountToPay = paymentMethod === "full" ? cartTotal : dpAmount;
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -136,6 +146,7 @@ export function ReservationPage({ navigate }: ReservationPageProps) {
           payment_method: paymentMethod,
           payment_image: paymentProof,
           paymentAmount: amountToPay,
+          nominal_dp: nominalDp,
           note: customerNotes,
           device_id: deviceId,
         },
@@ -184,6 +195,8 @@ export function ReservationPage({ navigate }: ReservationPageProps) {
 ${orderItemsMessage}
 
 *Total* : Rp. ${new Intl.NumberFormat("id-ID", { currency: "IDR" }).format(cartTotal)}
+*Total dibayar* : Rp. ${new Intl.NumberFormat("id-ID", { currency: "IDR" }).format(amountToPay)}
+*Kekurangan* : Rp. ${new Intl.NumberFormat("id-ID", { currency: "IDR" }).format(cartTotal - amountToPay)}
 
 Cek detail pesanan di sini:
 ${baseurl}#order-detail/${data?.data?.order_id}
@@ -193,7 +206,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
           const encodedMessage = encodeURIComponent(message);
 
           window.open(
-            `https://api.whatsapp.com/send?phone=6285290603309&text=${encodedMessage}`,
+            `https://api.whatsapp.com/send?phone=${setting?.whatsapp}&text=${encodedMessage}`,
             "_blank",
           );
           // setShowSuccessModal(true);
@@ -517,7 +530,10 @@ ${baseurl}#order-detail/${data?.data?.order_id}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div
-                  onClick={() => setPaymentMethod("full")}
+                  onClick={() => {
+                    setPaymentMethod("full");
+                    setAmountToPay(cartTotal);
+                  }}
                   className={`cursor-pointer border-2 rounded-2xl p-5 transition-all ${paymentMethod === "full" ? "border-primary bg-primary/5" : "border-gray-200 hover:border-primary/50"}`}
                 >
                   <div className="flex justify-between items-center mb-2">
@@ -540,12 +556,15 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                   </p>
                 </div>
                 <div
-                  onClick={() => setPaymentMethod("dp")}
+                  onClick={() => {
+                    setPaymentMethod("dp");
+                    setAmountToPay(cartTotal / 2);
+                  }}
                   className={`cursor-pointer border-2 rounded-2xl p-5 transition-all ${paymentMethod === "dp" ? "border-primary bg-primary/5" : "border-gray-200 hover:border-primary/50"}`}
                 >
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="font-bold font-family-inter text-dark">
-                      Bayar DP (50%)
+                      Bayar DP 50%
                     </h3>
                     <div
                       className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === "dp" ? "border-primary" : "border-gray-300"}`}
@@ -556,14 +575,72 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                     </div>
                   </div>
                   <p className="text-2xl font-bold text-primary-dark">
-                    {formatRupiah(dpAmount)}
+                    Rp
+                    {new Intl.NumberFormat("id-ID", { currency: "IDR" }).format(
+                      cartTotal / 2,
+                    )}
                   </p>
                   <p className="text-sm text-gray-500 mt-2">
-                    Sisa pembayaran {formatRupiah(cartTotal - dpAmount)} dibayar
-                    di kasir.
+                    Sisa pembayaran bisa Rp
+                    {new Intl.NumberFormat("id-ID", { currency: "IDR" }).format(
+                      cartTotal / 2,
+                    )}{" "}
+                    dibayar di kasir.
+                  </p>
+                </div>
+
+                <div
+                  onClick={() => setPaymentMethod("custom")}
+                  className={`cursor-pointer border-2 rounded-2xl p-5 transition-all ${paymentMethod === "custom" ? "border-primary bg-primary/5" : "border-gray-200 hover:border-primary/50"}`}
+                >
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-bold font-family-inter text-dark">
+                      DP Suka-Suka
+                    </h3>
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === "custom" ? "border-primary" : "border-gray-300"}`}
+                    >
+                      {paymentMethod === "custom" && (
+                        <div className="w-2.5 h-2.5 bg-primary rounded-full"></div>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-2xl font-bold text-primary-dark">
+                    Bebas Nominal
+                  </p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    DP suka-suka, Sisa pembayaran bisa dibayar di kasir.
                   </p>
                 </div>
               </div>
+
+              {paymentMethod === "custom" && (
+                <div className="mb-8">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Masukkan Nominal DP
+                  </label>
+                  <input
+                    type="text"
+                    name="nominal_dp"
+                    pattern="[0-9]+"
+                    className="outline-none block w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-primary focus:border-primary sm:text-sm transition-colors"
+                    placeholder="Masukkan nominal"
+                    onInput={(e) => {
+                      setNominalDp(e.currentTarget.value);
+                      setAmountToPay(e.currentTarget.value);
+                    }}
+                  />
+                  <div className="mt-2 w-full flex justify-between items-center">
+                    <h1 className="font-family-inter font-semibold">Nominal</h1>
+                    <h1 className="font-family-inter font-semibold">
+                      Rp{" "}
+                      {new Intl.NumberFormat("id-ID", {
+                        currency: "IDR",
+                      }).format(nominalDp)}
+                    </h1>
+                  </div>
+                </div>
+              )}
 
               <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 mb-8">
                 <h3 className="font-bold font-family-inter text-blue-900 mb-4">
@@ -830,7 +907,11 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Metode</span>
                   <span className="font-semibold text-dark text-sm">
-                    {paymentMethod === "full" ? "Bayar Lunas" : "DP 50%"}
+                    {paymentMethod === "full"
+                      ? "Bayar Lunas"
+                      : paymentMethod === "dp"
+                        ? "DP 50%"
+                        : "DP BEBAS"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">

@@ -117,7 +117,7 @@ export function Footer({ currentPage }: Props) {
 
         <div className="border-t border-white/10 pt-8 text-center text-gray-500 text-sm flex flex-col md:flex-row justify-between items-center">
           <p>
-            &copy; {new Date().getFullYear()} Ikan Bakar Pantura Merakurak -
+            &copy; {new Date().getFullYear()} Ikan Bakar Pantura Bogorejo -
             Tuban. Hak Cipta Dilindungi.
           </p>
           <p className="mt-2 md:mt-0">

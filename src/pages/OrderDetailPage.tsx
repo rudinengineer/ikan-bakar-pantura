@@ -246,7 +246,11 @@ export function OrderDetailPage({ navigate, currentPage }: Props) {
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-500">Status Pembayaran</span>
                     <span className="font-medium text-dark">
-                      {order?.payment_method === "full" ? "Lunas" : "DP 50%"}
+                      {order?.payment_method === "full"
+                        ? "Lunas"
+                        : order?.payment_method === "dp"
+                          ? "DP 50%"
+                          : "DP suka-suka"}
                       <span className="text-gray-400 ml-1">
                         ({formatRupiah(order?.payment_total || 0)})
                       </span>

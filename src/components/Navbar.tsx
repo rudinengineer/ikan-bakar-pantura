@@ -109,7 +109,7 @@ export function Navbar({ currentPage, navigate }: NavbarProps) {
               <span
                 className={`${isScrolled || isMobileMenuOpen ? "text-dark" : "text-[#A8A8A8]"} text-xs font-light tracking-widest uppercase mt-1`}
               >
-                Merakurak - Tuban
+                Bogorejo - Tuban
               </span>
             </div>
           </div>
@@ -146,12 +146,13 @@ export function Navbar({ currentPage, navigate }: NavbarProps) {
 
             {currentUser ? (
               <div className="flex items-center space-x-4">
-                <div
-                  className={`text-primary flex items-center space-x-2 text-sm font-medium bg-gray-50 px-3 py-1.5 rounded-full`}
+                <button
+                  onClick={() => navigate("profile")}
+                  className={`text-primary flex items-center space-x-2 text-sm font-medium bg-gray-50 px-3 py-1.5 rounded-full cursor-pointer`}
                 >
                   <UserIcon className="w-4 h-4 text-primary-dark" />
                   <span>{currentUser.name}</span>
-                </div>
+                </button>
                 <button
                   onClick={handleLogout}
                   className="p-2 text-gray-500 hover:text-red-500 transition-colors"
@@ -217,10 +218,13 @@ export function Navbar({ currentPage, navigate }: NavbarProps) {
             <div className="pt-4 mt-4 border-t border-gray-100">
               {currentUser ? (
                 <div className="space-y-4">
-                  <div className="flex items-center px-3 text-gray-700">
+                  <button
+                    onClick={() => navigate("profile")}
+                    className="flex items-center px-3 text-gray-700 cursor-pointer"
+                  >
                     <UserIcon className="w-5 h-5 mr-3 text-primary-dark" />
                     <span className="font-medium">{currentUser.name}</span>
-                  </div>
+                  </button>
                   <button
                     onClick={handleLogout}
                     className="flex items-center w-full px-3 py-3 text-red-600 hover:bg-red-50 rounded-md font-medium"
