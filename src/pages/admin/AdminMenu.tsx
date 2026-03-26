@@ -45,7 +45,7 @@ export default function AdminMenu({ navigate }: AuthPageProps) {
       cell: ({ row }) => {
         return (
           <img
-            src={assetUrl + "assets/images/" + row?.original?.image}
+            src={assetUrl + "uploads/" + row?.original?.image}
             width={80}
             alt={row?.original?.name}
           />

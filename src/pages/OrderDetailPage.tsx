@@ -261,7 +261,7 @@ export function OrderDetailPage({ navigate, currentPage }: Props) {
                     <span className="text-dark">Bukti Pembayaran</span>
                     <div className="p-4">
                       <img
-                        src={assetUrl + "assets/images/" + order?.payment_image}
+                        src={assetUrl + "uploads/" + order?.payment_image}
                         alt="Bukti Pembayaran"
                         className="mt-4 w-full sm:w-48"
                       />

@@ -64,7 +64,7 @@ export default function AdminPacket({ navigate }: AuthPageProps) {
       cell: ({ row }) => {
         return (
           <img
-            src={assetUrl + "assets/images/" + row?.original?.image}
+            src={assetUrl + "uploads/" + row?.original?.image}
             width={80}
             alt={row?.original?.name}
           />

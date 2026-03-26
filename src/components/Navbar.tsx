@@ -5,16 +5,21 @@ import {
   MenuIcon,
   XIcon,
   LogOutIcon,
+  ChevronDown,
 } from "lucide-react";
 import { useAppContext } from "../context/AppContext";
+import { storeType } from "../types/store";
+import { useAxios } from "../utils/axios";
 interface NavbarProps {
   currentPage: string;
   navigate: (page: string) => void;
 }
 export function Navbar({ currentPage, navigate }: NavbarProps) {
-  const { currentUser, cartItemCount, logout } = useAppContext();
+  const { setCurrentStore, currentStore, currentUser, cartItemCount, logout } =
+    useAppContext();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [stores, setStores] = React.useState<storeType[]>([]);
 
   const handleNavigate = (page: string) => {
     navigate(page);
@@ -29,26 +34,26 @@ export function Navbar({ currentPage, navigate }: NavbarProps) {
   const navLinks =
     currentUser?.role === "admin"
       ? [
-          {
-            id: "admin",
-            label: "Dashboard Admin",
-          },
-          {
-            id: "admin-category",
-            label: "Kelola Kategori",
-          },
-          {
-            id: "admin-packet",
-            label: "Kelola Paket",
-          },
-          {
-            id: "admin-menu",
-            label: "Kelola Menu",
-          },
-          {
-            id: "admin-setting",
-            label: "Pengaturan",
-          },
+          // {
+          //   id: "admin",
+          //   label: "Dashboard Admin",
+          // },
+          // {
+          //   id: "admin-category",
+          //   label: "Kelola Kategori",
+          // },
+          // {
+          //   id: "admin-packet",
+          //   label: "Kelola Paket",
+          // },
+          // {
+          //   id: "admin-menu",
+          //   label: "Kelola Menu",
+          // },
+          // {
+          //   id: "admin-setting",
+          //   label: "Pengaturan",
+          // },
         ]
       : [
           {
@@ -64,6 +69,10 @@ export function Navbar({ currentPage, navigate }: NavbarProps) {
                 {
                   id: "order-status",
                   label: "Reservasi Saya",
+                },
+                {
+                  id: "delivery-order",
+                  label: "Delivery Order",
                 },
               ]
             : []),
@@ -89,6 +98,17 @@ export function Navbar({ currentPage, navigate }: NavbarProps) {
     });
   }, [currentPage]);
 
+  React.useEffect(() => {
+    useAxios.get("/store").then(async (response) => {
+      const data = await response.data;
+
+      if (data?.status) {
+        setStores(data?.data);
+        setCurrentStore(data?.data[0]);
+      }
+    });
+  }, []);
+
   return (
     <nav
       className={`${(isScrolled || isMobileMenuOpen) && "bg-warm-50 shadow-sm"} fixed w-full top-0 z-50`}
@@ -96,21 +116,22 @@ export function Navbar({ currentPage, navigate }: NavbarProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20">
           {/* Logo */}
-          <div
-            className="flex items-center cursor-pointer"
-            onClick={() => handleNavigate("home")}
-          >
+          <div className="flex items-center cursor-pointer">
             <div className="flex flex-col">
               <span
+                onClick={() => handleNavigate("home")}
                 className={`${isScrolled || isMobileMenuOpen ? "text-dark" : "text-white"} font-family-inter font-bold text-base sm:text-2xl tracking-tight leading-none`}
               >
                 Ikan <span className="text-primary">Bakar</span> Pantura
               </span>
-              <span
-                className={`${isScrolled || isMobileMenuOpen ? "text-dark" : "text-[#A8A8A8]"} text-xs font-light tracking-widest uppercase mt-1`}
+              <div
+                className={`${isScrolled || isMobileMenuOpen ? "text-dark" : "text-[#A8A8A8]"} text-xs font-light tracking-widest uppercase mt-1 flex items-center gap-1`}
               >
-                Bogorejo - Tuban
-              </span>
+                <span>
+                  {currentStore?.name} - {currentStore?.area}
+                </span>
+                <ChevronDown className="size-4" />
+              </div>
             </div>
           </div>
 
@@ -120,7 +141,7 @@ export function Navbar({ currentPage, navigate }: NavbarProps) {
               <button
                 key={link.id}
                 onClick={() => handleNavigate(link.id)}
-                className={`text-sm sm:text-xs font-medium transition-colors duration-200 ${currentPage === link.id ? "text-primary-dark border-b-2 border-primary pb-1" : "text-gray-600 hover:text-primary"}`}
+                className={`text-sm sm:text-xs font-medium transition-colors duration-200 ${currentPage === link.id ? "text-primary-dark border-b-2 border-primary pb-1" : `${isScrolled ? "text-gray-600" : "text-white"} hover:text-primary`}`}
               >
                 {link.label}
               </button>
@@ -241,6 +262,71 @@ export function Navbar({ currentPage, navigate }: NavbarProps) {
                   Masuk / Daftar
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Switch Store */}
+      {false && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center md:p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            onClick={() => {}}
+          ></div>
+          <div className="relative bg-[#FDFBF7] w-full h-full md:h-auto md:max-h-[85vh] md:max-w-2xl md:rounded-2xl flex flex-col overflow-hidden shadow-2xl animate-fade-in">
+            {/* Modal Header */}
+            <div className="bg-primary px-6 py-4 flex items-center justify-between border-b-4 border-primary-dark/20 shadow-sm z-10">
+              <h2 className="text-base sm:text-2xl font-family-inter font-bold text-dark tracking-wide uppercase">
+                Pilih Cabang
+              </h2>
+              <button
+                onClick={() => {}}
+                className="p-2 bg-black/10 hover:bg-black/20 rounded-full text-dark transition-colors"
+              >
+                <XIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div
+              className={`flex-1 overflow-y-auto p-6 sm:p-8 custom-scrollbar relative ${cartItemCount > 0 ? "pb-28" : ""}`}
+            >
+              {/* Decorative background pattern (subtle) */}
+              <div
+                className="absolute inset-0 opacity-[0.03] pointer-events-none"
+                style={{
+                  backgroundImage: "radial-gradient(#000 1px, transparent 1px)",
+                  backgroundSize: "20px 20px",
+                }}
+              ></div>
+
+              <div className="relative z-10 space-y-10">
+                <div className="menu-group">
+                  <div className="space-y-6">
+                    <div className="flex flex-col group">
+                      <div className="flex items-center justify-between">
+                        {/* Name and Price Row */}
+                        <div className="flex items-center justify-between w-full mb-1">
+                          <div className="flex items-center gap-2">
+                            <div>
+                              <h1 className="font-bold font-family-inter text-dark text-base sm:text-lg leading-none">
+                                Cabang Merakurak
+                              </h1>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => {}}
+                            className="px-4 py-1.5 rounded-lg bg-white border border-gray-200 text-dark text-sm font-bold flex items-center hover:bg-primary hover:border-primary hover:shadow-sm transition-all"
+                          >
+                            Pilih Cabang
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

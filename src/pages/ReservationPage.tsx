@@ -26,8 +26,14 @@ interface ReservationPageProps {
 }
 
 export function ReservationPage({ navigate }: ReservationPageProps) {
-  const { logout, currentUser, cart, cartTotal, createReservation, clearCart } =
-    useAppContext();
+  const {
+    currentStore,
+    currentUser,
+    cart,
+    cartTotal,
+    createReservation,
+    clearCart,
+  } = useAppContext();
   const [step, setStep] = useState(1);
   // Form State
   const [customerName, setCustomerName] = React.useState<any>(
@@ -136,6 +142,7 @@ export function ReservationPage({ navigate }: ReservationPageProps) {
       .post(
         "/checkout",
         {
+          store_id: currentStore?.id,
           customer_name: customerName,
           customer_phone: customerPhone,
           order_items: JSON.stringify(orderItems),
@@ -209,6 +216,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
             `https://api.whatsapp.com/send?phone=${setting?.whatsapp}&text=${encodedMessage}`,
             "_blank",
           );
+          navigate("order-status");
           // setShowSuccessModal(true);
         }
       })
@@ -228,7 +236,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(setting?.account_number);
+      await navigator.clipboard.writeText(currentStore?.account_number ?? "");
       swal.fire({
         icon: "success",
         title: "Success",
@@ -239,21 +247,21 @@ ${baseurl}#order-detail/${data?.data?.order_id}
     }
   };
 
-  React.useEffect(() => {
-    useAxios
-      .get("/setting", {
-        headers: {
-          Authorization: `Bearer ${currentUser?.access_token ?? ""}`,
-        },
-      })
-      .then(async (response) => {
-        const data = await response.data;
+  // React.useEffect(() => {
+  //   useAxios
+  //     .get("/setting", {
+  //       headers: {
+  //         Authorization: `Bearer ${currentUser?.access_token ?? ""}`,
+  //       },
+  //     })
+  //     .then(async (response) => {
+  //       const data = await response.data;
 
-        if (data?.status) {
-          setSetting(data?.data);
-        }
-      });
-  }, []);
+  //       if (data?.status) {
+  //         setSetting(data?.data);
+  //       }
+  //     });
+  // }, []);
 
   return (
     <div className="min-h-screen bg-warm-50 py-8">
@@ -649,10 +657,12 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                 <div className="space-y-4">
                   <div className="sm:flex justify-between items-center bg-white p-4 rounded-xl border border-blue-100">
                     <div>
-                      <p className="font-bold text-dark">{setting?.bank}</p>
+                      <p className="font-bold text-dark">
+                        {currentStore?.bank}
+                      </p>
                       <div className="flex gap-2 items-center">
                         <p className="text-gray-600 font-mono">
-                          {setting?.account_number}
+                          {currentStore?.account_number}
                         </p>
                         <button
                           onClick={() => copyToClipboard()}
@@ -663,7 +673,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                         </button>
                       </div>
                       <p className="text-sm text-gray-500">
-                        {setting?.account_name}
+                        {currentStore?.account_name}
                       </p>
                     </div>
                     <div className="mt-2 sm:mt-0 sm:text-right">
@@ -678,7 +688,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                 </div>
 
                 {/* QRIS */}
-                {setting?.qris && (
+                {currentStore?.qris && (
                   <div className="mt-3 space-y-4">
                     <div className="flex justify-center items-center bg-white p-4 rounded-xl border border-blue-100">
                       <div>
@@ -689,7 +699,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                       </div> */}
 
                         <img
-                          src={assetUrl + "assets/images/" + setting?.qris}
+                          src={assetUrl + "uploads/" + currentStore?.qris}
                           alt="QRIS"
                           className="w-full h-full sm:h-60"
                         />
@@ -822,19 +832,19 @@ ${baseurl}#order-detail/${data?.data?.order_id}
               <div className="bg-gray-50 rounded-2xl p-5 space-y-4 border border-gray-100">
                 <h4 className="font-bold font-family-inter text-dark text-sm uppercase tracking-wider flex items-center">
                   <CalendarIcon className="w-4 h-4 mr-2 text-primary-dark" />
-                  Detail Reservasi
+                  Detail Reservasi ({currentStore?.name})
                 </h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs text-gray-500">Nama</p>
                     <p className="font-semibold text-dark text-sm">
-                      {currentUser?.name}
+                      {customerName}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">WhatsApp</p>
                     <p className="font-semibold text-dark text-sm">
-                      {currentUser?.phone}
+                      {customerPhone}
                     </p>
                   </div>
                   <div>

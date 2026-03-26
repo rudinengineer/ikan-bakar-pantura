@@ -16,6 +16,7 @@ import { PacketProducts } from "./pages/PacketProducts";
 import { OrderDetailPage } from "./pages/OrderDetailPage";
 import AdminSetting from "./pages/admin/AdminSetting";
 import Profile from "./pages/Profile";
+import { DeliveryOrderPage } from "./pages/DeliveryOrderPage";
 
 function AppContent() {
   const { currentUser } = useAppContext();
@@ -67,6 +68,8 @@ function AppContent() {
         return <ReservationPage navigate={navigate} />;
       case "order-status":
         return <OrderStatusPage navigate={navigate} />;
+      case "delivery-order":
+        return <DeliveryOrderPage navigate={navigate} />;
       case "admin":
         return <AdminDashboard navigate={navigate} />;
       case "admin-category":

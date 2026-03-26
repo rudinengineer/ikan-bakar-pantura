@@ -31,8 +31,7 @@ export function MenuPage({ navigate }: MenuPageProps) {
     updateQuantity,
     cartTotal,
     cartItemCount,
-    currentUser,
-    reservations,
+    currentStore,
   } = useAppContext();
   const [categories, setCategories] = React.useState<categoryType[]>([]);
   const [activeCategory, setActiveCategory] = React.useState<string>("");
@@ -48,6 +47,9 @@ export function MenuPage({ navigate }: MenuPageProps) {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const [keyword, setKeyword] = React.useState<string>("");
+
   const isSearching = searchQuery.trim().length > 0;
   // Filter menu items for search
   const searchResults = isSearching
@@ -68,33 +70,39 @@ export function MenuPage({ navigate }: MenuPageProps) {
     addToCart(item, 1);
     // showToast(`${item.name} ditambahkan ke keranjang`);
   };
-  const showToast = (message: string) => {
-    setToastMessage(message);
-    setTimeout(() => setToastMessage(null), 2000);
-  };
 
   React.useEffect(() => {
     /* Fetch Category */
-    useAxios
-      .get("/categories")
-      .then(async (response) => {
-        const data = await response.data;
-        if (data?.status) {
-          setCategories(data?.data);
-          setActiveCategory(data?.data[0]?.slug);
-        }
-      })
-      .finally(() => {
-        setCategoryLoading(false);
-      });
-  }, []);
+    if (currentStore) {
+      useAxios
+        .get("/categories", {
+          params: {
+            store_id: currentStore?.id,
+          },
+        })
+        .then(async (response) => {
+          const data = await response.data;
+          if (data?.status) {
+            setCategories(data?.data);
+            setActiveCategory(data?.data[0]?.slug);
+          }
+        })
+        .finally(() => {
+          setCategoryLoading(false);
+        });
+    }
+  }, [currentStore]);
 
   React.useEffect(() => {
     if (activeCategory) {
       setPacketLoading(true);
 
       useAxios
-        .get("/packet/" + activeCategory)
+        .get("/packet/" + activeCategory, {
+          params: {
+            keyword: keyword,
+          },
+        })
         .then(async (response) => {
           const data = await response.data;
           if (data?.status) {
@@ -105,7 +113,7 @@ export function MenuPage({ navigate }: MenuPageProps) {
           setPacketLoading(false);
         });
     }
-  }, [activeCategory]);
+  }, [activeCategory, keyword]);
 
   React.useEffect(() => {
     if (selectedPacket?.id) {
@@ -212,7 +220,7 @@ export function MenuPage({ navigate }: MenuPageProps) {
           <img
             src={background}
             alt="Background"
-            className="w-full h-full object-cover"
+            className="translate-y-[75px] sm:translate-y-0 w-full h-full object-cover"
           />
 
           <div className="absolute inset-0 bg-dark/70 bg-gradient-to-t from-dark/90 to-transparent"></div>
@@ -226,7 +234,7 @@ export function MenuPage({ navigate }: MenuPageProps) {
             <img src={logo} alt="Ikan Bakar Pantura" width={280} />
           </div>
           <span className="mt-4 inline-block py-3 px-6 rounded-full bg-primary/20 text-primary border border-primary/30 text-[10px] sm:text-sm font-semibold tracking-wider uppercase mb-6 backdrop-blur-sm">
-            Spesialis Seafood Tuban
+            RAJANYA IKAN BAKAR
           </span>
         </div>
       </div>
@@ -240,8 +248,8 @@ export function MenuPage({ navigate }: MenuPageProps) {
           <input
             type="text"
             placeholder="Cari menu spesifik (ex: Gurame, Udang...)"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={keyword}
+            onInput={(e) => setKeyword(e.currentTarget.value)}
             className="w-full py-3 px-4 outline-none text-gray-700 bg-transparent"
           />
         </div>
@@ -336,7 +344,7 @@ export function MenuPage({ navigate }: MenuPageProps) {
                       </h1>
                     )}
                     <img
-                      src={assetUrl + "assets/images/" + value.image}
+                      src={assetUrl + "uploads/" + value.image}
                       alt={value.name}
                       className="w-full sm:h-52 rounded-xl"
                     />
@@ -357,7 +365,7 @@ export function MenuPage({ navigate }: MenuPageProps) {
                       onClick={() => setActiveCategory(categories[1].slug)}
                       className="mt-1.5 group relative flex items-center justify-center gap-1.5 rounded-full border border-transparent bg-primary p-3 px-5 text-sm font-semibold text-dark shadow-md transition-all hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                     >
-                      <span>Kunjungi Menu Basic</span>
+                      <span>Kunjungi Menu {categories[1].name}</span>
                       <ArrowUpRight className="size-4" />
                     </button>
                   </div>
@@ -434,9 +442,7 @@ export function MenuPage({ navigate }: MenuPageProps) {
                             <div className="flex items-center justify-between w-full mb-1">
                               <div className="flex items-center gap-2">
                                 <img
-                                  src={
-                                    assetUrl + "assets/images/" + value.image
-                                  }
+                                  src={assetUrl + "uploads/" + value.image}
                                   alt={value.name}
                                   className="size-14 rounded-md"
                                 />
@@ -501,7 +507,7 @@ export function MenuPage({ navigate }: MenuPageProps) {
                   {activeCategory === categories[0].slug && (
                     <div className="w-full flex justify-center">
                       <img
-                        src={assetUrl + "assets/images/" + selectedPacket.image}
+                        src={assetUrl + "uploads/" + selectedPacket.image}
                         alt={selectedPacket.name}
                         className="w-full rounded-md"
                       />

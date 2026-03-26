@@ -6,12 +6,40 @@ import {
   InstagramIcon,
   FacebookIcon,
 } from "lucide-react";
+import { useAxios } from "../utils/axios";
+import { useAppContext } from "../context/AppContext";
 
 interface Props {
   currentPage: string;
 }
 
 export function Footer({ currentPage }: Props) {
+  const {
+    currentStore,
+    currentUser,
+    cart,
+    cartTotal,
+    createReservation,
+    clearCart,
+  } = useAppContext();
+  const [setting, setSetting] = React.useState<any>();
+
+  React.useEffect(() => {
+    useAxios
+      .get("/setting", {
+        headers: {
+          Authorization: `Bearer ${currentUser?.access_token ?? ""}`,
+        },
+      })
+      .then(async (response) => {
+        const data = await response.data;
+
+        if (data?.status) {
+          setSetting(data?.data);
+        }
+      });
+  }, []);
+
   return (
     <footer className="bg-dark text-white pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -20,7 +48,7 @@ export function Footer({ currentPage }: Props) {
             {/* Brand Info */}
             <div>
               <h3 className="font-family-inter font-bold text-2xl text-primary mb-4">
-                Ikan Bakar Pantura
+                {currentStore?.name}
               </h3>
               <p className="text-gray-400 mb-6 leading-relaxed">
                 Menyajikan cita rasa seafood tradisional terbaik dengan bumbu
@@ -52,11 +80,16 @@ export function Footer({ currentPage }: Props) {
               <ul className="space-y-4 text-gray-300">
                 <li className="flex items-start">
                   <MapPinIcon className="w-5 h-5 text-primary mr-3 mt-1 flex-shrink-0" />
-                  <span>Jl. Raya Merakurak, Tuban, Jawa Timur</span>
+                  <span>{currentStore?.address}</span>
                 </li>
-                <li className="flex items-center">
-                  <PhoneIcon className="w-5 h-5 text-primary mr-3 flex-shrink-0" />
-                  <span>0852-9060-3309</span>
+                <li>
+                  <a
+                    href={`https://wa.me/${currentStore?.whatsapp}`}
+                    className="flex items-center"
+                  >
+                    <PhoneIcon className="w-5 h-5 text-primary mr-3 flex-shrink-0" />
+                    <span>{currentStore?.whatsapp}</span>
+                  </a>
                 </li>
                 <li className="flex items-start">
                   <ClockIcon className="w-5 h-5 text-primary mr-3 mt-1 flex-shrink-0" />
@@ -117,8 +150,8 @@ export function Footer({ currentPage }: Props) {
 
         <div className="border-t border-white/10 pt-8 text-center text-gray-500 text-sm flex flex-col md:flex-row justify-between items-center">
           <p>
-            &copy; {new Date().getFullYear()} Ikan Bakar Pantura Bogorejo -
-            Tuban. Hak Cipta Dilindungi.
+            &copy; {new Date().getFullYear()} {currentStore?.name} -
+            {currentStore?.area}. Hak Cipta Dilindungi.
           </p>
           <p className="mt-2 md:mt-0">
             Dibuat dengan ❤️ untuk pecinta seafood.

@@ -46,7 +46,7 @@ export default function AdminPacketMenu({
       cell: ({ row }) => {
         return (
           <img
-            src={assetUrl + "assets/images/" + row?.original?.product?.image}
+            src={assetUrl + "uploads/" + row?.original?.product?.image}
             width={80}
             alt={row?.original?.name}
           />

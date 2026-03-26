@@ -191,7 +191,7 @@ export default function AdminSetting({ navigate }: AuthPageProps) {
               {setting?.qris && (
                 <div className="mt-4">
                   <img
-                    src={assetUrl + "assets/images/" + setting?.qris}
+                    src={assetUrl + "uploads/" + setting?.qris}
                     alt="QRIS"
                     className="size-full sm:h-60 rounded-md"
                   />

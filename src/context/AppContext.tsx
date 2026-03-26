@@ -1,10 +1,13 @@
 import React, { useEffect, useState, createContext, useContext } from "react";
 import { User, CartItem, Reservation, MenuItem } from "../types";
+import { storeType } from "../types/store";
 interface AppContextType {
+  currentStore: storeType | undefined;
   currentUser: User | null;
   users: User[];
   cart: CartItem[];
   reservations: Reservation[];
+  setCurrentStore: (store: storeType) => void;
   login: (user: User, token: string) => void;
   logout: () => void;
   addToCart: (menuItem: MenuItem, quantity: number) => void;
@@ -28,6 +31,7 @@ const ADMIN_USER: User = {
 };
 export function AppProvider({ children }: { children: ReactNode }) {
   // Initialize state from localStorage or defaults
+  const [currentStore, setCurrentStoreState] = React.useState<storeType>();
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     const saved = localStorage.getItem("currentUser");
     return saved ? JSON.parse(saved) : null;
@@ -58,6 +62,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("reservations", JSON.stringify(reservations));
   }, [reservations]);
   // Auth actions
+  const setCurrentStore = (store: storeType) => {
+    setCurrentStoreState(store);
+  };
   const login = (user: User, token: string) => {
     user.access_token = token;
     setCurrentUser(user);
@@ -162,10 +169,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider
       value={{
+        currentStore,
         currentUser,
         users,
         cart,
         reservations,
+        setCurrentStore,
         login,
         logout,
         addToCart,
