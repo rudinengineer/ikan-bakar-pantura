@@ -18,7 +18,7 @@ interface Props {
 
 export function DeliveryOrderPage({ navigate }: Props) {
   const [orders, setOrders] = React.useState([]);
-  const [isLoading, setIsLoading] = React.useState<boolean>(true);
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
   const { logout, currentUser, reservations } = useAppContext();
   // if (!currentUser) return null;
@@ -61,31 +61,31 @@ export function DeliveryOrderPage({ navigate }: Props) {
     }
   };
 
-  React.useEffect(() => {
-    useAxios
-      .get("/order/history", {
-        headers: {
-          Authorization: `Bearer ${currentUser?.access_token ?? ""}`,
-        },
-      })
-      .then(async (response) => {
-        const data = await response.data;
+  // React.useEffect(() => {
+  //   useAxios
+  //     .get("/order/history", {
+  //       headers: {
+  //         Authorization: `Bearer ${currentUser?.access_token ?? ""}`,
+  //       },
+  //     })
+  //     .then(async (response) => {
+  //       const data = await response.data;
 
-        if (data?.status) {
-          setOrders(data?.data);
-        }
-      })
-      .catch((e) => {
-        if (e.response.status === 401) {
-          logout();
-          navigate("auth");
-          return;
-        }
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, []);
+  //       if (data?.status) {
+  //         setOrders(data?.data);
+  //       }
+  //     })
+  //     .catch((e) => {
+  //       if (e.response.status === 401) {
+  //         logout();
+  //         navigate("auth");
+  //         return;
+  //       }
+  //     })
+  //     .finally(() => {
+  //       setIsLoading(false);
+  //     });
+  // }, []);
 
   return (
     <div className="min-h-screen bg-warm-50 py-12 sm:pt-24">

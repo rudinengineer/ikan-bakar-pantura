@@ -231,7 +231,12 @@ export function MenuPage({ navigate }: MenuPageProps) {
             Katalog Menu
           </h1> */}
           <div className="w-full flex justify-center">
-            <img src={logo} alt="Ikan Bakar Pantura" width={280} />
+            <img
+              src={assetUrl + "uploads/" + currentStore?.logo}
+              alt={currentStore?.name}
+              width={280}
+            />
+            {/* <img src={logo} alt={currentStore?.name} width={280} /> */}
           </div>
           <span className="mt-4 inline-block py-3 px-6 rounded-full bg-primary/20 text-primary border border-primary/30 text-[10px] sm:text-sm font-semibold tracking-wider uppercase mb-6 backdrop-blur-sm">
             RAJANYA IKAN BAKAR

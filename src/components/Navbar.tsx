@@ -15,11 +15,18 @@ interface NavbarProps {
   navigate: (page: string) => void;
 }
 export function Navbar({ currentPage, navigate }: NavbarProps) {
-  const { setCurrentStore, currentStore, currentUser, cartItemCount, logout } =
-    useAppContext();
+  const {
+    clearCart,
+    setCurrentStore,
+    currentStore,
+    currentUser,
+    cartItemCount,
+    logout,
+  } = useAppContext();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [stores, setStores] = React.useState<storeType[]>([]);
+  const [showStoresModal, setShowStoresModal] = React.useState<boolean>(false);
 
   const handleNavigate = (page: string) => {
     navigate(page);
@@ -109,6 +116,12 @@ export function Navbar({ currentPage, navigate }: NavbarProps) {
     });
   }, []);
 
+  const switchStore = (data: storeType) => {
+    clearCart();
+    setCurrentStore(data);
+    setShowStoresModal(false);
+  };
+
   return (
     <nav
       className={`${(isScrolled || isMobileMenuOpen) && "bg-warm-50 shadow-sm"} fixed w-full top-0 z-50`}
@@ -122,9 +135,11 @@ export function Navbar({ currentPage, navigate }: NavbarProps) {
                 onClick={() => handleNavigate("home")}
                 className={`${isScrolled || isMobileMenuOpen ? "text-dark" : "text-white"} font-family-inter font-bold text-base sm:text-2xl tracking-tight leading-none`}
               >
-                Ikan <span className="text-primary">Bakar</span> Pantura
+                {currentStore?.name}
+                {/* Ikan <span className="text-primary">Bakar</span> Pantura */}
               </span>
               <div
+                onClick={() => setShowStoresModal(true)}
                 className={`${isScrolled || isMobileMenuOpen ? "text-dark" : "text-[#A8A8A8]"} text-xs font-light tracking-widest uppercase mt-1 flex items-center gap-1`}
               >
                 <span>
@@ -268,11 +283,13 @@ export function Navbar({ currentPage, navigate }: NavbarProps) {
       )}
 
       {/* Switch Store */}
-      {false && (
+      {showStoresModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center md:p-4">
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-            onClick={() => {}}
+            onClick={() => {
+              setShowStoresModal(false);
+            }}
           ></div>
           <div className="relative bg-[#FDFBF7] w-full h-full md:h-auto md:max-h-[85vh] md:max-w-2xl md:rounded-2xl flex flex-col overflow-hidden shadow-2xl animate-fade-in">
             {/* Modal Header */}
@@ -281,7 +298,9 @@ export function Navbar({ currentPage, navigate }: NavbarProps) {
                 Pilih Cabang
               </h2>
               <button
-                onClick={() => {}}
+                onClick={() => {
+                  setShowStoresModal(false);
+                }}
                 className="p-2 bg-black/10 hover:bg-black/20 rounded-full text-dark transition-colors"
               >
                 <XIcon className="w-6 h-6" />
@@ -304,25 +323,32 @@ export function Navbar({ currentPage, navigate }: NavbarProps) {
                 <div className="menu-group">
                   <div className="space-y-6">
                     <div className="flex flex-col group">
-                      <div className="flex items-center justify-between">
-                        {/* Name and Price Row */}
-                        <div className="flex items-center justify-between w-full mb-1">
-                          <div className="flex items-center gap-2">
-                            <div>
-                              <h1 className="font-bold font-family-inter text-dark text-base sm:text-lg leading-none">
-                                Cabang Merakurak
-                              </h1>
+                      {/* Name and Price Row */}
+                      {stores.map((value) => (
+                        <div className="mb-3 flex items-center justify-between">
+                          <div className="flex items-center justify-between w-full mb-1">
+                            <div className="flex items-center gap-2">
+                              <div>
+                                <h1 className="font-bold font-family-inter text-dark text-base sm:text-lg leading-none">
+                                  {value.name}
+                                </h1>
+                              </div>
                             </div>
-                          </div>
 
-                          <button
-                            onClick={() => {}}
-                            className="px-4 py-1.5 rounded-lg bg-white border border-gray-200 text-dark text-sm font-bold flex items-center hover:bg-primary hover:border-primary hover:shadow-sm transition-all"
-                          >
-                            Pilih Cabang
-                          </button>
+                            <button
+                              onClick={() =>
+                                value.id !== currentStore?.id &&
+                                switchStore(value)
+                              }
+                              className={`${currentStore?.id === value.id ? "bg-primary" : "bg-white"} px-4 py-1.5 rounded-lg border border-gray-200 text-dark text-sm font-bold flex items-center hover:bg-primary hover:border-primary hover:shadow-sm transition-all`}
+                            >
+                              {value.id === currentStore?.id
+                                ? "Cabang Saat Ini"
+                                : "Pilih Cabang"}
+                            </button>
+                          </div>
                         </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
                 </div>
