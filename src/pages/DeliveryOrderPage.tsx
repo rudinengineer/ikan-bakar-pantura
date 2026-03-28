@@ -193,7 +193,7 @@ export function DeliveryOrderPage({ navigate }: Props) {
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-500">Status Pembayaran</span>
                       <span className="font-medium text-dark">
-                        {value.payment_method === "full" ? "Lunas" : "DP 50%"}
+                        {value.payment_method === "full" ? "Lunas" : "DP"}
                         <span className="text-gray-400 ml-1">
                           ({formatRupiah(value.payment_total || 0)})
                         </span>

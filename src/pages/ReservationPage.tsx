@@ -194,7 +194,7 @@ export function ReservationPage({ navigate }: ReservationPageProps) {
 - *Waktu Kedatangan* : ${time}
 - *Jumlah Orang* : ${parseInt(people)}
 - *Tempat Duduk* : ${place}
-- *Metode Pembayaran* : ${paymentMethod === "full" ? "Lunas" : "DP 50%"}
+- *Metode Pembayaran* : ${paymentMethod === "full" ? "Lunas" : "DP"}
 - *Total Pembayaran* : Rp ${new Intl.NumberFormat("id-ID", { currency: "IDR" }).format(amountToPay)}
 - *Catatan* : ${customerNotes}
 
@@ -920,7 +920,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                     {paymentMethod === "full"
                       ? "Bayar Lunas"
                       : paymentMethod === "dp"
-                        ? "DP 50%"
+                        ? "DP"
                         : "DP BEBAS"}
                   </span>
                 </div>

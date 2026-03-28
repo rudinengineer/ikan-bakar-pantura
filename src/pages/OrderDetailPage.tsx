@@ -249,7 +249,7 @@ export function OrderDetailPage({ navigate, currentPage }: Props) {
                       {order?.payment_method === "full"
                         ? "Lunas"
                         : order?.payment_method === "dp"
-                          ? "DP 50%"
+                          ? "DP"
                           : "DP suka-suka"}
                       <span className="text-gray-400 ml-1">
                         ({formatRupiah(order?.payment_total || 0)})

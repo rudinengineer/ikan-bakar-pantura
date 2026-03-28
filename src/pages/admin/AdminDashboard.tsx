@@ -1076,7 +1076,7 @@ export function AdminDashboard({ navigate }: Props) {
                           <span className="font-semibold text-dark text-sm px-2.5 py-1 bg-white rounded-lg border border-gray-200">
                             {currentRes.paymentMethod === "full"
                               ? "Bayar Lunas"
-                              : "DP 50%"}
+                              : "DP"}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">

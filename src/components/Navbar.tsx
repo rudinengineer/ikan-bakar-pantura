@@ -142,8 +142,8 @@ export function Navbar({ currentPage, navigate }: NavbarProps) {
                 onClick={() => setShowStoresModal(true)}
                 className={`${isScrolled || isMobileMenuOpen ? "text-dark" : "text-[#A8A8A8]"} text-xs font-light tracking-widest uppercase mt-1 flex items-center gap-1`}
               >
-                <span>
-                  {currentStore?.name} - {currentStore?.area}
+                <span className="font-family-inter">
+                  Cabang {currentStore?.area}
                 </span>
                 <ChevronDown className="size-4" />
               </div>
@@ -331,6 +331,9 @@ export function Navbar({ currentPage, navigate }: NavbarProps) {
                               <div>
                                 <h1 className="font-bold font-family-inter text-dark text-base sm:text-lg leading-none">
                                   {value.name}
+                                </h1>
+                                <h1 className="font-family-inter">
+                                  {value.area}
                                 </h1>
                               </div>
                             </div>

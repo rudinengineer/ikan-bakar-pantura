@@ -7,7 +7,7 @@ interface AuthPageProps {
   navigate: (page: string) => void;
 }
 export function AuthPage({ navigate }: AuthPageProps) {
-  const { login } = useAppContext();
+  const { currentStore, login } = useAppContext();
   const [isLogin, setIsLogin] = useState(true);
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
@@ -63,6 +63,7 @@ export function AuthPage({ navigate }: AuthPageProps) {
     } else {
       useAxios
         .post("/auth/register", {
+          store_id: currentStore?.id,
           name,
           phone,
           password,
