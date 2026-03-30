@@ -68,6 +68,9 @@ export function OrderStatusPage({ navigate }: Props) {
           Authorization: `Bearer ${currentUser?.access_token ?? ""}`,
           "X-DEVICE-ID": localStorage.getItem("device_id"),
         },
+        params: {
+          type: "reservation",
+        },
       })
       .then(async (response) => {
         const data = await response.data;
@@ -125,7 +128,7 @@ export function OrderStatusPage({ navigate }: Props) {
 
                 <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
-                    <h4 className="font-bold text-dark mb-4">
+                    <h4 className="font-family-inter font-bold text-dark mb-4">
                       Detail Kunjungan
                     </h4>
                     <div className="space-y-3">

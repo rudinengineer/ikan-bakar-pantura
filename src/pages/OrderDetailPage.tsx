@@ -153,7 +153,8 @@ export function OrderDetailPage({ navigate, currentPage }: Props) {
     <div className="min-h-screen bg-warm-50 py-12 pt-24">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-family-inter font-bold text-dark mb-8">
-          Detail Reservasi
+          Detail{" "}
+          {order?.type === "delivery-order" ? "Delivery Order" : "Reservasi"}
         </h1>
 
         {isLoading && (
@@ -168,7 +169,7 @@ export function OrderDetailPage({ navigate, currentPage }: Props) {
               <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                   <p className="text-sm text-gray-500 mb-1">
-                    ID Reservasi:{" "}
+                    ID Pesanan:{" "}
                     <span className="font-mono font-medium text-dark">
                       {order?.order_id}
                     </span>
@@ -182,7 +183,12 @@ export function OrderDetailPage({ navigate, currentPage }: Props) {
 
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <h4 className="font-bold text-dark mb-4">Detail Kunjungan</h4>
+                  <h4 className="font-bold font-family-inter text-dark mb-4">
+                    Detail{" "}
+                    {order?.type === "delivery-order"
+                      ? "Pengantaran"
+                      : "Kunjungan"}
+                  </h4>
                   <div className="space-y-3">
                     <div className="flex items-start">
                       <ClockIcon className="w-5 h-5 text-gray-400 mr-3 mt-0.5" />
@@ -195,14 +201,16 @@ export function OrderDetailPage({ navigate, currentPage }: Props) {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-start">
-                      <UtensilsIcon className="w-5 h-5 text-gray-400 mr-3 mt-0.5" />
-                      <div>
-                        <p className="font-medium text-dark">
-                          {order?.customer_total} Orang
-                        </p>
+                    {order?.type === "reservation" && (
+                      <div className="flex items-start">
+                        <UtensilsIcon className="w-5 h-5 text-gray-400 mr-3 mt-0.5" />
+                        <div>
+                          <p className="font-medium text-dark">
+                            {order?.customer_total} Orang
+                          </p>
+                        </div>
                       </div>
-                    </div>
+                    )}
                     {order?.note && (
                       <div className="flex items-start">
                         <MessageSquareIcon className="w-5 h-5 text-amber-500 mr-3 mt-0.5" />

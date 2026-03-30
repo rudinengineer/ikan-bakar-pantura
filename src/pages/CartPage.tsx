@@ -209,9 +209,16 @@ export function CartPage({ navigate }: CartPageProps) {
                   Reservasi
                 </button>
 
-                <button className="mt-4 w-full bg-gray-400 hover:bg-gray-500 text-dark font-bold py-4 rounded-xl transition-colors shadow-md flex justify-center items-center">
-                  Delivery Order (Coming Soon)
+                <button
+                  onClick={() => navigate("delivery")}
+                  className="mt-4 w-full bg-gray-400 hover:bg-gray-500 text-dark font-bold py-4 rounded-xl transition-colors shadow-md flex justify-center items-center"
+                >
+                  Delivery Order
                 </button>
+
+                {/* <button className="mt-4 w-full bg-gray-400 hover:bg-gray-500 text-dark font-bold py-4 rounded-xl transition-colors shadow-md flex justify-center items-center">
+                  Delivery Order (Coming Soon)
+                </button> */}
               </div>
             </div>
           </div>

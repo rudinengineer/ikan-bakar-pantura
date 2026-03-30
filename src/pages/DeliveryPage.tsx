@@ -25,7 +25,7 @@ interface ReservationPageProps {
   navigate: (page: string) => void;
 }
 
-export function ReservationPage({ navigate }: ReservationPageProps) {
+export function DeliveryPage({ navigate }: ReservationPageProps) {
   const {
     currentStore,
     currentUser,
@@ -57,6 +57,9 @@ export function ReservationPage({ navigate }: ReservationPageProps) {
   const [loadingCheckout, setLoadingCheckout] = React.useState<boolean>(false);
   const [setting, setSetting] = React.useState<any>();
   const [nominalDp, setNominalDp] = React.useState<number>(0);
+  const [showSelectTimeModal, setShowSelectTimeModal] =
+    React.useState<boolean>(false);
+  const [timesAvailable, setTimesAvailable] = React.useState<Array<any>>();
 
   const dpAmount = cartTotal * 0.5;
   const [amountToPay, setAmountToPay] = React.useState<number>(
@@ -95,8 +98,8 @@ export function ReservationPage({ navigate }: ReservationPageProps) {
     }
   };
   const handleOpenConfirm = () => {
-    if (!date || !time || !people || !place) {
-      alert("Mohon lengkapi detail reservasi");
+    if (!date || !time) {
+      alert("Mohon lengkapi detail delivery order");
       return;
     }
     if (!paymentProof) {
@@ -156,7 +159,7 @@ export function ReservationPage({ navigate }: ReservationPageProps) {
           nominal_dp: nominalDp,
           note: customerNotes,
           device_id: deviceId,
-          type: "reservation",
+          type: "delivery-order",
         },
         {
           headers: {
@@ -192,10 +195,8 @@ export function ReservationPage({ navigate }: ReservationPageProps) {
 - *Cabang* : ${currentStore?.area}
 - *Nama* : ${customerName}
 - *No. WA* : ${customerPhone}
-- *Tanggal Kedatangan* : ${formattedDate}
-- *Waktu Kedatangan* : ${time}
-- *Jumlah Orang* : ${parseInt(people)}
-- *Tempat Duduk* : ${place}
+- *Tanggal Antar* : ${formattedDate}
+- *Waktu Antar* : ${time}
 - *Metode Pembayaran* : ${paymentMethod === "full" ? "Lunas" : "DP"}
 - *Total Pembayaran* : Rp ${new Intl.NumberFormat("id-ID", { currency: "IDR" }).format(amountToPay)}
 - *Catatan* : ${customerNotes}
@@ -226,7 +227,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
         swal.fire({
           icon: "error",
           title: "Error",
-          text: "Gagal membuat reservasi. Silahkan coba lagi!",
+          text: "Gagal membuat delivery order. Silahkan coba lagi!",
           timer: 2500,
         });
       })
@@ -264,6 +265,25 @@ ${baseurl}#order-detail/${data?.data?.order_id}
   //       }
   //     });
   // }, []);
+
+  React.useEffect(() => {
+    if (date) {
+      setTime('')
+      useAxios
+        .get("time-available", {
+          params: {
+            date: date,
+          },
+        })
+        .then(async (response) => {
+          const data = await response.data;
+
+          if (data?.status) {
+            setTimesAvailable(data?.data);
+          }
+        });
+    }
+  }, [date]);
 
   return (
     <div className="min-h-screen bg-warm-50 py-8">
@@ -308,7 +328,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
           {step === 1 && (
             <div className="p-6 sm:p-8">
               <h2 className="text-2xl font-family-inter font-bold text-dark mb-6">
-                Detail Reservasi
+                Detail Delivery Order
               </h2>
               <div className="space-y-6">
                 <div>
@@ -349,7 +369,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Tanggal
@@ -367,56 +387,20 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Jam Kedatangan
+                      Jam Antar
                     </label>
                     <div className="relative">
-                      <ClockIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <input
-                        type="time"
-                        value={time}
-                        onChange={(e) => setTime(e.target.value)}
-                        min="10:00"
-                        max="21:00"
-                        className="w-full pl-10 p-3 border border-gray-300 rounded-xl focus:ring-primary focus:border-primary"
-                      />
+                      <button
+                        onClick={() => setShowSelectTimeModal(true)}
+                        className="w-full p-3 border border-gray-300 rounded-xl text-start flex items-center gap-2 focus:border-primary"
+                      >
+                        <ClockIcon className="size-5 text-gray-400" />
+                        <span className="text-gray-700">
+                          {time ? time : "Pilih Jam"}
+                        </span>
+                      </button>
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Jumlah Orang
-                    </label>
-                    <div className="relative">
-                      <UsersIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <input
-                        type="number"
-                        min="1"
-                        max="50"
-                        value={people}
-                        onChange={(e) => setPeople(e.target.value)}
-                        className="w-full pl-10 p-3 border border-gray-300 rounded-xl focus:ring-primary focus:border-primary"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Tempat Duduk
-                  </label>
-                  <select
-                    onChange={(e) => setPlace(e.target.value)}
-                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-500"
-                  >
-                    <option value="" disabled selected>
-                      Pilih Tempat Duduk
-                    </option>
-                    <option value="Lesehan">Lesehan</option>
-                    <option value="Meja & Kursi">Meja & Kursi</option>
-                  </select>
-                  <p className="mt-1 text-red-500 text-sm">
-                    Meja & Kursi / Lesehan Bersifat request, Jika tersedia maka
-                    admin akan melakukan konfirmasi.
-                  </p>
                 </div>
 
                 {/* Customer Notes Field */}
@@ -440,7 +424,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
               <div className="mt-8 pt-6 border-t border-gray-100 flex justify-end">
                 <button
                   onClick={() => {
-                    if (!date || !time || !people || !place)
+                    if (!date || !time)
                       swal.fire({
                         icon: "error",
                         title: "Error",
@@ -805,7 +789,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                       Memproses...
                     </>
                   ) : (
-                    "Selesaikan Reservasi"
+                    "Selesaikan Delivery Order"
                   )}
                 </button>
               </div>
@@ -825,7 +809,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
             {/* Modal Header */}
             <div className="sticky top-0 bg-white border-b border-gray-100 p-6 rounded-t-3xl flex justify-between items-center">
               <h3 className="text-xl font-family-inter font-bold text-dark">
-                Konfirmasi Reservasi
+                Konfirmasi Delivery Order
               </h3>
               <button
                 onClick={() => setShowConfirmModal(false)}
@@ -846,7 +830,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
               <div className="bg-gray-50 rounded-2xl p-5 space-y-4 border border-gray-100">
                 <h4 className="font-bold font-family-inter text-dark text-sm uppercase tracking-wider flex items-center">
                   <CalendarIcon className="w-4 h-4 mr-2 text-primary-dark" />
-                  Detail Reservasi ({currentStore?.name})
+                  Detail Delivery Order ({currentStore?.name})
                 </h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -874,20 +858,10 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Jam</p>
+                    <p className="text-xs text-gray-500">Jam Antar</p>
                     <p className="font-semibold text-dark text-sm">
                       {time} WIB
                     </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Jumlah Orang</p>
-                    <p className="font-semibold text-dark text-sm">
-                      {people} Orang
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Tempat Duduk</p>
-                    <p className="font-semibold text-dark text-sm">{place}</p>
                   </div>
                 </div>
               </div>
@@ -1081,7 +1055,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                   }}
                   className="w-full bg-primary hover:bg-primary-dark text-dark font-bold py-3.5 rounded-xl transition-colors shadow-sm"
                 >
-                  Lihat Status Reservasi
+                  Lihat Status Delivery
                 </button>
                 <button
                   onClick={() => {
@@ -1092,6 +1066,77 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                 >
                   Kembali ke Menu
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Select Time */}
+      {showSelectTimeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center md:p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            onClick={() => {
+              setShowSelectTimeModal(false);
+            }}
+          ></div>
+          <div className="relative bg-[#FDFBF7] w-full h-full md:h-auto md:max-h-[85vh] md:max-w-2xl md:rounded-2xl flex flex-col overflow-hidden shadow-2xl animate-fade-in">
+            {/* Modal Header */}
+            <div className="bg-primary px-6 py-4 flex items-center justify-between border-b-4 border-primary-dark/20 shadow-sm z-10">
+              <h2 className="text-base sm:text-2xl font-family-inter font-bold text-dark tracking-wide uppercase">
+                Pilih Jam Antar
+              </h2>
+              <button
+                onClick={() => {
+                  setShowSelectTimeModal(false);
+                }}
+                className="p-2 bg-black/10 hover:bg-black/20 rounded-full text-dark transition-colors"
+              >
+                <XIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div
+              className={`flex-1 overflow-y-auto p-6 sm:p-8 custom-scrollbar relative pb-28`}
+            >
+              {/* Decorative background pattern (subtle) */}
+              <div
+                className="absolute inset-0 opacity-[0.03] pointer-events-none"
+                style={{
+                  backgroundImage: "radial-gradient(#000 1px, transparent 1px)",
+                  backgroundSize: "20px 20px",
+                }}
+              ></div>
+
+              <div className="relative z-10 space-y-10">
+                <div className="menu-group">
+                  <div className="space-y-6">
+                    {date ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {timesAvailable?.map((value, index) => (
+                          <button
+                            onClick={() => {
+                              setTime(value?.time);
+                              setShowSelectTimeModal(false);
+                            }}
+                            disabled={Boolean(value?.available) ? false : true}
+                            className={`${time === value && "bg-primary text-white"} px-4 py-2 rounded-md border-2 border-primary transition ease-in-out hover:bg-slate-200 disabled:bg-slate-300`}
+                            key={index}
+                          >
+                            <h1 className="font-semibold font-family-inter">
+                              {value?.time}
+                            </h1>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <h1 className="text-center font-family-inter">
+                        Harap memilih tanggal pengantaran
+                      </h1>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

@@ -17,6 +17,7 @@ import { OrderDetailPage } from "./pages/OrderDetailPage";
 import AdminSetting from "./pages/admin/AdminSetting";
 import Profile from "./pages/Profile";
 import { DeliveryOrderPage } from "./pages/DeliveryOrderPage";
+import { DeliveryPage } from "./pages/DeliveryPage";
 
 function AppContent() {
   const { currentUser } = useAppContext();
@@ -66,6 +67,8 @@ function AppContent() {
         return <AuthPage navigate={navigate} />;
       case "reservation":
         return <ReservationPage navigate={navigate} />;
+      case "delivery":
+        return <DeliveryPage navigate={navigate} />;
       case "order-status":
         return <OrderStatusPage navigate={navigate} />;
       case "delivery-order":

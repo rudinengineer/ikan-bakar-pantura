@@ -61,31 +61,35 @@ export function DeliveryOrderPage({ navigate }: Props) {
     }
   };
 
-  // React.useEffect(() => {
-  //   useAxios
-  //     .get("/order/history", {
-  //       headers: {
-  //         Authorization: `Bearer ${currentUser?.access_token ?? ""}`,
-  //       },
-  //     })
-  //     .then(async (response) => {
-  //       const data = await response.data;
+  React.useEffect(() => {
+    useAxios
+      .get("/order/history", {
+        headers: {
+          Authorization: `Bearer ${currentUser?.access_token ?? ""}`,
+          "X-DEVICE-ID": localStorage.getItem("device_id"),
+        },
+        params: {
+          type: "delivery-order",
+        },
+      })
+      .then(async (response) => {
+        const data = await response.data;
 
-  //       if (data?.status) {
-  //         setOrders(data?.data);
-  //       }
-  //     })
-  //     .catch((e) => {
-  //       if (e.response.status === 401) {
-  //         logout();
-  //         navigate("auth");
-  //         return;
-  //       }
-  //     })
-  //     .finally(() => {
-  //       setIsLoading(false);
-  //     });
-  // }, []);
+        if (data?.status) {
+          setOrders(data?.data);
+        }
+      })
+      .catch((e) => {
+        if (e.response.status === 401) {
+          logout();
+          navigate("auth");
+          return;
+        }
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
 
   return (
     <div className="min-h-screen bg-warm-50 py-12 sm:pt-24">
@@ -110,7 +114,7 @@ export function DeliveryOrderPage({ navigate }: Props) {
                 <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
                     <p className="text-sm text-gray-500 mb-1">
-                      ID Reservasi:{" "}
+                      ID Delivery Order:{" "}
                       <span className="font-mono font-medium text-dark">
                         {value.order_id}
                       </span>
@@ -124,8 +128,8 @@ export function DeliveryOrderPage({ navigate }: Props) {
 
                 <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
-                    <h4 className="font-bold text-dark mb-4">
-                      Detail Kunjungan
+                    <h4 className="font-family-inter font-bold text-dark mb-4">
+                      Detail Pengantaran
                     </h4>
                     <div className="space-y-3">
                       <div className="flex items-start">
@@ -136,14 +140,6 @@ export function DeliveryOrderPage({ navigate }: Props) {
                           </p>
                           <p className="text-gray-500 text-sm">
                             Jam {value.booking_time} WIB
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-start">
-                        <UtensilsIcon className="w-5 h-5 text-gray-400 mr-3 mt-0.5" />
-                        <div>
-                          <p className="font-medium text-dark">
-                            {value.customer_total} Orang
                           </p>
                         </div>
                       </div>
