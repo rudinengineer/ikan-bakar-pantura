@@ -189,7 +189,7 @@ export function DeliveryPage({ navigate }: ReservationPageProps) {
             month: "long",
             year: "numeric",
           }).format(new Date(date));
-          const message = `~ Terimakasih kak *${customerName}* telah memesan.
+          const message = `~ Terimakasih kak *${customerName}* telah memesan delivery order.
 
 ~ *Detail Pelanggan* :
 - *Cabang* : ${currentStore?.area}
@@ -268,7 +268,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
 
   React.useEffect(() => {
     if (date) {
-      setTime('')
+      setTime("");
       useAxios
         .get("time-available", {
           params: {
@@ -1051,7 +1051,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                 <button
                   onClick={() => {
                     setShowSuccessModal(false);
-                    navigate("order-status");
+                    navigate("delivery-order");
                   }}
                   className="w-full bg-primary hover:bg-primary-dark text-dark font-bold py-3.5 rounded-xl transition-colors shadow-sm"
                 >

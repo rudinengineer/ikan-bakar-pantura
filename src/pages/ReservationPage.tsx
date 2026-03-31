@@ -186,7 +186,7 @@ export function ReservationPage({ navigate }: ReservationPageProps) {
             month: "long",
             year: "numeric",
           }).format(new Date(date));
-          const message = `~ Terimakasih kak *${customerName}* telah memesan.
+          const message = `~ Terimakasih kak *${customerName}* telah memesan reservasi.
 
 ~ *Detail Pelanggan* :
 - *Cabang* : ${currentStore?.area}
