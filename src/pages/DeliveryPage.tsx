@@ -34,6 +34,7 @@ export function DeliveryPage({ navigate }: ReservationPageProps) {
     createReservation,
     clearCart,
   } = useAppContext();
+
   const [step, setStep] = useState(1);
   // Form State
   const [customerName, setCustomerName] = React.useState<any>(
@@ -61,10 +62,11 @@ export function DeliveryPage({ navigate }: ReservationPageProps) {
     React.useState<boolean>(false);
   const [timesAvailable, setTimesAvailable] = React.useState<Array<any>>();
 
-  const dpAmount = cartTotal * 0.5;
+  const cartGrandTotal = cartTotal + 10000;
+  const dpAmount = cartGrandTotal * 0.5;
   const [amountToPay, setAmountToPay] = React.useState<number>(
     paymentMethod === "full"
-      ? cartTotal
+      ? cartGrandTotal
       : paymentMethod === "dp"
         ? dpAmount
         : nominalDp,
@@ -149,7 +151,7 @@ export function DeliveryPage({ navigate }: ReservationPageProps) {
           customer_name: customerName,
           customer_phone: customerPhone,
           order_items: JSON.stringify(orderItems),
-          totalAmount: cartTotal,
+          totalAmount: cartGrandTotal,
           booking_date: date,
           booking_time: time,
           customer_total: parseInt(people),
@@ -204,9 +206,10 @@ export function DeliveryPage({ navigate }: ReservationPageProps) {
 ~ *Detail Pesanan* :
 ${orderItemsMessage}
 
-*Total* : Rp. ${new Intl.NumberFormat("id-ID", { currency: "IDR" }).format(cartTotal)}
+*Biaya Ongkir* : Rp. ${new Intl.NumberFormat("id-ID", { currency: "IDR" }).format(10000)}
+*Total* : Rp. ${new Intl.NumberFormat("id-ID", { currency: "IDR" }).format(cartGrandTotal)}
 *Total dibayar* : Rp. ${new Intl.NumberFormat("id-ID", { currency: "IDR" }).format(amountToPay)}
-*Kekurangan* : Rp. ${new Intl.NumberFormat("id-ID", { currency: "IDR" }).format(cartTotal - amountToPay)}
+*Kekurangan* : Rp. ${new Intl.NumberFormat("id-ID", { currency: "IDR" }).format(cartGrandTotal - amountToPay)}
 
 Cek detail pesanan di sini:
 ${baseurl}#order-detail/${data?.data?.order_id}
@@ -501,7 +504,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                 <div className="pt-4 border-t border-gray-200 flex justify-between items-center">
                   <span className="font-bold text-dark">Total Pembayaran</span>
                   <span className="text-2xl font-bold text-primary-dark">
-                    {formatRupiah(cartTotal)}
+                    {formatRupiah(cartGrandTotal)}
                   </span>
                 </div>
               </div>
@@ -538,7 +541,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                 <div
                   onClick={() => {
                     setPaymentMethod("full");
-                    setAmountToPay(cartTotal);
+                    setAmountToPay(cartGrandTotal);
                   }}
                   className={`cursor-pointer border-2 rounded-2xl p-5 transition-all ${paymentMethod === "full" ? "border-primary bg-primary/5" : "border-gray-200 hover:border-primary/50"}`}
                 >
@@ -555,7 +558,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                     </div>
                   </div>
                   <p className="text-2xl font-bold text-primary-dark">
-                    {formatRupiah(cartTotal)}
+                    {formatRupiah(cartGrandTotal)}
                   </p>
                   <p className="text-sm text-gray-500 mt-2">
                     Bayar penuh sekarang, tinggal datang dan nikmati.
@@ -564,7 +567,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                 <div
                   onClick={() => {
                     setPaymentMethod("dp");
-                    setAmountToPay(cartTotal / 2);
+                    setAmountToPay(cartGrandTotal / 2);
                   }}
                   className={`cursor-pointer border-2 rounded-2xl p-5 transition-all ${paymentMethod === "dp" ? "border-primary bg-primary/5" : "border-gray-200 hover:border-primary/50"}`}
                 >
@@ -583,13 +586,13 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                   <p className="text-2xl font-bold text-primary-dark">
                     Rp
                     {new Intl.NumberFormat("id-ID", { currency: "IDR" }).format(
-                      cartTotal / 2,
+                      cartGrandTotal / 2,
                     )}
                   </p>
                   <p className="text-sm text-gray-500 mt-2">
                     Sisa pembayaran bisa Rp
                     {new Intl.NumberFormat("id-ID", { currency: "IDR" }).format(
-                      cartTotal / 2,
+                      cartGrandTotal / 2,
                     )}{" "}
                     dibayar di kasir.
                   </p>
@@ -919,9 +922,15 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
+                  <span className="text-gray-600 text-sm">Biaya Ongkir</span>
+                  <span className="font-semibold text-dark text-sm">
+                    {formatRupiah(10000)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Total Tagihan</span>
                   <span className="font-semibold text-dark text-sm">
-                    {formatRupiah(cartTotal)}
+                    {formatRupiah(cartGrandTotal)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center pt-3 border-t border-primary/20">
@@ -932,7 +941,7 @@ ${baseurl}#order-detail/${data?.data?.order_id}
                 </div>
                 {paymentMethod === "dp" && (
                   <p className="text-xs text-gray-500 bg-white/60 p-2 rounded-lg">
-                    Sisa {formatRupiah(cartTotal - dpAmount)} dibayar saat
+                    Sisa {formatRupiah(cartGrandTotal - dpAmount)} dibayar saat
                     kedatangan di kasir.
                   </p>
                 )}

@@ -211,7 +211,7 @@ export function CartPage({ navigate }: CartPageProps) {
 
                 <button
                   onClick={() => navigate("delivery")}
-                  className="mt-4 w-full bg-gray-400 hover:bg-gray-500 text-dark font-bold py-4 rounded-xl transition-colors shadow-md flex justify-center items-center"
+                  className="mt-4 w-full bg-primary hover:bg-primary-dark text-dark font-bold py-4 rounded-xl transition-colors shadow-md flex justify-center items-center"
                 >
                   Delivery Order
                 </button>
