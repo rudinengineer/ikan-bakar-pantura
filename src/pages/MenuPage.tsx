@@ -84,7 +84,11 @@ export function MenuPage({ navigate }: MenuPageProps) {
           const data = await response.data;
           if (data?.status) {
             setCategories(data?.data);
-            setActiveCategory(data?.data[0]?.slug);
+            if (data?.data[0]?.name !== "") {
+              setActiveCategory(data?.data[0]?.slug);
+            } else {
+              setActiveCategory(data?.data[1]?.slug);
+            }
           }
         })
         .finally(() => {
@@ -296,15 +300,18 @@ export function MenuPage({ navigate }: MenuPageProps) {
                 ))}
 
               {!categoryLoading &&
-                categories.map((value, index) => (
-                  <button
-                    onClick={() => setActiveCategory(value.slug)}
-                    className={`${activeCategory === value.slug ? "border-primary bg-primary hover:bg-yellow-500" : "border-[#E5E7EB] hover:bg-slate-200"} p-3 px-8 font-semibold text-xs rounded-full border-[1px] shrink-0 transition ease-in-out`}
-                    key={index}
-                  >
-                    {value.name}
-                  </button>
-                ))}
+                categories.map(
+                  (value, index) =>
+                    value.name !== "" && (
+                      <button
+                        onClick={() => setActiveCategory(value.slug)}
+                        className={`${activeCategory === value.slug ? "border-primary bg-primary hover:bg-yellow-500" : "border-[#E5E7EB] hover:bg-slate-200"} p-3 px-8 font-semibold text-xs rounded-full border-[1px] shrink-0 transition ease-in-out`}
+                        key={index}
+                      >
+                        {value.name}
+                      </button>
+                    ),
+                )}
             </div>
 
             <div className="mt-6 mb-4 w-full flex justify-center">
